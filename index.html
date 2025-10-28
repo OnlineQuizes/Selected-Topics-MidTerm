@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selected Topics - LLM Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f0f8ff;
+            --text-color: #1a202c;
+            --primary-color: #4a5568;
+            --secondary-color: #2b6cb0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --border-color: rgba(226, 232, 240, 0.5);
+            --option-bg: #f7fafc;
+            --option-hover-bg: #e2e8f0;
+            --quiz-header-bg: linear-gradient(135deg, #2b6cb0 0%, #3182ce 100%);
+            --correct-bg: #e8f5e9;
+            --correct-border: #43a047;
+            --incorrect-bg: #ffebee;
+            --incorrect-border: #e53935;
+            --gradient-color: rgba(43, 108, 176, 0.03);
+            --background-pattern: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%232b6cb0' fill-opacity='0.05'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a202c;
+            --text-color: #ffffff;
+            --primary-color: #90cdf4;
+            --secondary-color: #63b3ed;
+            --card-bg: rgba(26, 32, 44, 0.95);
+            --border-color: rgba(74, 85, 104, 0.5);
+            --option-bg: rgba(160, 174, 192, 0.1);
+            --option-hover-bg: rgba(160, 174, 192, 0.2);
+            --quiz-header-bg: linear-gradient(135deg, #2b6cb0 0%, #3182ce 100%);
+            --correct-bg: #1a3c27;
+            --correct-border: #43a047;
+            --incorrect-bg: #3c1a1d;
+            --incorrect-border: #e53935;
+            --gradient-color: transparent;
+            --background-pattern: none;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(to right, var(--gradient-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--gradient-color) 1px, transparent 1px),
+                var(--background-pattern);
+            background-size: 
+                40px 40px,
+                40px 40px,
+                52px 26px;
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .quiz-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin: 3rem 0 1rem;
+            padding: 1.5rem;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            border-top: 2px solid rgba(43, 108, 176, 0.1);
+            opacity: 0.9;
+        }
+
+        [data-theme="dark"] .footer-note {
+            color: var(--secondary-color);
+            border-color: rgba(99, 179, 237, 0.2);
+        }
+
+        .section-divider {
+            margin: 3rem 0;
+            border: 0;
+            height: 4px;
+            background: var(--primary-color);
+            opacity: 0.2;
+            border-radius: 2px;
+        }
+
+        .section-header {
+            background: var(--quiz-header-bg);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 2.5rem 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(43, 108, 176, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header::after {
+            content: '🧠';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.15;
+            font-size: 2.5rem;
+        }
+
+        .quiz-container::before {
+            content: '🤖💬📚';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            font-size: 120px;
+            opacity: 0.05;
+            transform: rotate(15deg);
+            z-index: 0;
+        }
+
+        .quiz-header {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: white;
+            padding: 1.5rem;
+            background: var(--quiz-header-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(43, 108, 176, 0.2);
+            position: relative;
+            overflow: hidden;
+            transform: translateY(-5px);
+        }
+
+        .quiz-header::after {
+            content: '🤖';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.15;
+            font-size: 3rem;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(43, 108, 176, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(43, 108, 176, 0.2);
+            background: var(--secondary-color);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .question {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: visible;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .question::before {
+            content: '🤔';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            opacity: 0.8;
+            z-index: 1;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .question:hover {
+            transform: translateX(10px);
+            border-color: var(--primary-color);
+            box-shadow: 6px 6px 20px rgba(43, 108, 176, 0.1);
+        }
+
+        .question:hover::before {
+            transform: translateY(-50%) rotate(360deg) scale(1.2);
+            left: -35px;
+            color: var(--secondary-color);
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            padding: 1.2rem;
+            margin: 1rem 0;
+            background: var(--option-bg);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 12px;
+            border: 2px solid transparent;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .options label:hover {
+            background: var(--option-hover-bg);
+            transform: translateX(5px);
+            box-shadow: 4px 4px 12px rgba(43, 108, 176, 0.1);
+        }
+
+        .options input[type="radio"] {
+            margin-left: 1rem;
+            transform: scale(1.4);
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .answer-box {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding: 1.2rem;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            position: relative;
+            z-index: 2;
+            border-left: 5px solid;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .correct {
+            background: var(--correct-bg);
+            border-color: var(--correct-border);
+            color: var(--text-color);
+        }
+
+        .correct::before {
+            content: '✅';
+            margin-right: 10px;
+        }
+
+        .incorrect {
+            background: var(--incorrect-bg);
+            border-color: var(--incorrect-border);
+            color: var(--text-color);
+        }
+
+        .incorrect::before {
+            content: '❌';
+            margin-right: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-box {
+            background: rgba(43, 108, 176, 0.1);
+            border-left: 5px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-container {
+                margin: 1rem;
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+            
+            .quiz-header {
+                font-size: 1.8rem;
+                padding: 1rem;
+            }
+            
+            .question::before {
+                display: none;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+            
+            .sub-question {
+                margin-top: 1rem;
+                padding-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            Selected Topics - LLM Quiz
+        </div>
+        
+        <div class="info-box">
+            <h3>About LLMs</h3>
+            <p>Large Language Models (LLMs) are AI systems trained on vast amounts of text data to understand and generate human-like text. They power many modern AI applications including chatbots, translation services, and content generation tools.</p>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="resetQuiz()"> Reset</button>
+            <button class="btn" onclick="showAllAnswers()"> Show Answers</button>
+            <button class="btn" onclick="hideAllAnswers()"> Hide Answers</button>
+            <button class="btn" id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+        </div>
+
+        <!-- Questions 1-6 -->
+        <div class="question">
+            <h3>1. LLM stands for:</h3>
+            <div class="options">
+                <label><input type="radio" name="q1" value="a"> a) Large Language Model</label>
+                <label><input type="radio" name="q1" value="b"> b) Long Learning Machine</label>
+                <label><input type="radio" name="q1" value="c"> c) Language Logic Module</label>
+                <label><input type="radio" name="q1" value="d"> d) Local Learning Model</label>
+            </div>
+            <div class="answer-box" id="answer1" data-correct-answer="a">Correct Answer: a) Large Language Model</div>
+        </div>
+
+        <div class="question">
+            <h3>2. LLMs are mainly used for:</h3>
+            <div class="options">
+                <label><input type="radio" name="q2" value="a"> a) Image editing</label>
+                <label><input type="radio" name="q2" value="b"> b) Text generation</label>
+                <label><input type="radio" name="q2" value="c"> c) Game physics</label>
+                <label><input type="radio" name="q2" value="d"> d) Audio compression</label>
+            </div>
+            <div class="answer-box" id="answer2" data-correct-answer="b">Correct Answer: b) Text generation</div>
+        </div>
+
+        <div class="question">
+            <h3>3. LLMs are trained on:</h3>
+            <div class="options">
+                <label><input type="radio" name="q3" value="a"> a) Text data</label>
+                <label><input type="radio" name="q3" value="b"> b) Images only</label>
+                <label><input type="radio" name="q3" value="c"> c) Sound only</label>
+                <label><input type="radio" name="q3" value="d"> d) Video only</label>
+            </div>
+            <div class="answer-box" id="answer3" data-correct-answer="a">Correct Answer: a) Text data</div>
+        </div>
+
+        <div class="question">
+            <h3>4. Which model architecture is common in LLMs?</h3>
+            <div class="options">
+                <label><input type="radio" name="q4" value="a"> a) CNN</label>
+                <label><input type="radio" name="q4" value="b"> b) RNN</label>
+                <label><input type="radio" name="q4" value="c"> c) Transformer</label>
+                <label><input type="radio" name="q4" value="d"> d) KNN</label>
+            </div>
+            <div class="answer-box" id="answer4" data-correct-answer="c">Correct Answer: c) Transformer</div>
+        </div>
+
+        <div class="question">
+            <h3>5. Tokens represent:</h3>
+            <div class="options">
+                <label><input type="radio" name="q5" value="a"> a) Words or sub-words in text</label>
+                <label><input type="radio" name="q5" value="b"> b) Database keys</label>
+                <label><input type="radio" name="q5" value="c"> c) Pictures</label>
+                <label><input type="radio" name="q5" value="d"> d) Audio samples</label>
+            </div>
+            <div class="answer-box" id="answer5" data-correct-answer="a">Correct Answer: a) Words or sub-words in text</div>
+        </div>
+
+        <div class="question">
+            <h3>6. An example of LLM application is:</h3>
+            <div class="options">
+                <label><input type="radio" name="q6" value="a"> a) Chatbot</label>
+                <label><input type="radio" name="q6" value="b"> b) Disk cleaner</label>
+                <label><input type="radio" name="q6" value="c"> c) GPU controller</label>
+                <label><input type="radio" name="q6" value="d"> d) BIOS setup</label>
+            </div>
+            <div class="answer-box" id="answer6" data-correct-answer="a">Correct Answer: a) Chatbot</div>
+        </div>
+
+        <!-- Questions 7-14 -->
+        <div class="question">
+            <h3>7. LLMs require:</h3>
+            <div class="options">
+                <label><input type="radio" name="q7" value="a"> a) Large datasets</label>
+                <label><input type="radio" name="q7" value="b"> b) No data</label>
+                <label><input type="radio" name="q7" value="c"> c) Small RAM only</label>
+                <label><input type="radio" name="q7" value="d"> d) Manual typing only</label>
+            </div>
+            <div class="answer-box" id="answer7" data-correct-answer="a">Correct Answer: a) Large datasets</div>
+        </div>
+
+        <div class="question">
+            <h3>8. The main purpose of an LLM is:</h3>
+            <div class="options">
+                <label><input type="radio" name="q8" value="a"> a) Understand and generate language</label>
+                <label><input type="radio" name="q8" value="b"> b) Control hardware</label>
+                <label><input type="radio" name="q8" value="c"> c) Render video</label>
+                <label><input type="radio" name="q8" value="d"> d) Compress Wi-Fi packets</label>
+            </div>
+            <div class="answer-box" id="answer8" data-correct-answer="a">Correct Answer: a) Understand and generate language</div>
+        </div>
+
+        <div class="question">
+            <h3>9. A risk of LLM misuse:</h3>
+            <div class="options">
+                <label><input type="radio" name="q9" value="a"> a) Fake information</label>
+                <label><input type="radio" name="q9" value="b"> b) GPU overheating</label>
+                <label><input type="radio" name="q9" value="c"> c) Disk fragmentation</label>
+                <label><input type="radio" name="q9" value="d"> d) Mouse lag</label>
+            </div>
+            <div class="answer-box" id="answer9" data-correct-answer="a">Correct Answer: a) Fake information</div>
+        </div>
+
+        <div class="question">
+            <h3>10. LLMs can be used to:</h3>
+            <div class="options">
+                <label><input type="radio" name="q10" value="a"> a) Text generation</label>
+                <label><input type="radio" name="q10" value="b"> b) Question answering</label>
+                <label><input type="radio" name="q10" value="c"> c) Language understanding</label>
+                <label><input type="radio" name="q10" value="d"> d) All of the above</label>
+            </div>
+            <div class="answer-box" id="answer10" data-correct-answer="d">Correct Answer: d) All of the above</div>
+        </div>
+
+        <div class="question">
+            <h3>11. More parameters in an LLM usually mean:</h3>
+            <div class="options">
+                <label><input type="radio" name="q11" value="a"> a) Better text understanding</label>
+                <label><input type="radio" name="q11" value="b"> b) Slower training</label>
+                <label><input type="radio" name="q11" value="c"> c) Both a and b</label>
+                <label><input type="radio" name="q11" value="d"> d) None</label>
+            </div>
+            <div class="answer-box" id="answer11" data-correct-answer="c">Correct Answer: c) Both a and b</div>
+        </div>
+
+        <div class="question">
+            <h3>12. LLMs are part of which AI field?</h3>
+            <div class="options">
+                <label><input type="radio" name="q12" value="a"> a) Networking</label>
+                <label><input type="radio" name="q12" value="b"> b) NLP</label>
+                <label><input type="radio" name="q12" value="c"> c) Robotics</label>
+                <label><input type="radio" name="q12" value="d"> d) Databases</label>
+            </div>
+            <div class="answer-box" id="answer12" data-correct-answer="b">Correct Answer: b) NLP</div>
+        </div>
+
+        <div class="question">
+            <h3>13. A larger LLM always guarantees better responses in every task.</h3>
+            <div class="options">
+                <label><input type="radio" name="q13" value="a"> a) True</label>
+                <label><input type="radio" name="q13" value="b"> b) False</label>
+            </div>
+            <div class="answer-box" id="answer13" data-correct-answer="b">Correct Answer: b) False</div>
+        </div>
+
+        <div class="question">
+            <h3>14. Training an LLM requires large computational resources.</h3>
+            <div class="options">
+                <label><input type="radio" name="q14" value="a"> a) True</label>
+                <label><input type="radio" name="q14" value="b"> b) False</label>
+            </div>
+            <div class="answer-box" id="answer14" data-correct-answer="a">Correct Answer: a) True</div>
+        </div>
+
+        <!-- Questions 15-22 -->
+        <div class="question">
+            <h3>15. LLMs can summarize, translate, and classify text.</h3>
+            <div class="options">
+                <label><input type="radio" name="q15" value="a"> a) True</label>
+                <label><input type="radio" name="q15" value="b"> b) False</label>
+            </div>
+            <div class="answer-box" id="answer15" data-correct-answer="a">Correct Answer: a) True</div>
+        </div>
+
+        <div class="question">
+            <h3>16. LLMs understand meaning exactly like humans.</h3>
+            <div class="options">
+                <label><input type="radio" name="q16" value="a"> a) True</label>
+                <label><input type="radio" name="q16" value="b"> b) False</label>
+            </div>
+            <div class="answer-box" id="answer16" data-correct-answer="b">Correct Answer: b) False</div>
+        </div>
+
+        <div class="question">
+            <h3>17. Prompt engineering can improve response quality.</h3>
+            <div class="options">
+                <label><input type="radio" name="q17" value="a"> a) True</label>
+                <label><input type="radio" name="q17" value="b"> b) False</label>
+            </div>
+            <div class="answer-box" id="answer17" data-correct-answer="a">Correct Answer: a) True</div>
+        </div>
+
+        <div class="question">
+            <h3>18. A common LLM challenge is:</h3>
+            <div class="options">
+                <label><input type="radio" name="q18" value="a"> a) Hallucination</label>
+                <label><input type="radio" name="q18" value="b"> b) Unlimited accuracy</label>
+                <label><input type="radio" name="q18" value="c"> c) Zero bias</label>
+                <label><input type="radio" name="q18" value="d"> d) Infinite memory</label>
+            </div>
+            <div class="answer-box" id="answer18" data-correct-answer="a">Correct Answer: a) Hallucination</div>
+        </div>
+
+        <div class="question">
+            <h3>19. LLMs can perform:</h3>
+            <div class="options">
+                <label><input type="radio" name="q19" value="a"> a) Translation</label>
+                <label><input type="radio" name="q19" value="b"> b) Farming</label>
+                <label><input type="radio" name="q19" value="c"> c) Car diagnostics</label>
+                <label><input type="radio" name="q19" value="d"> d) GPS tracking</label>
+            </div>
+            <div class="answer-box" id="answer19" data-correct-answer="a">Correct Answer: a) Translation</div>
+        </div>
+
+        <div class="question">
+            <h3>20. Which phase adapts an LLM to a specific domain?</h3>
+            <div class="options">
+                <label><input type="radio" name="q20" value="a"> a) Fine-Tuning</label>
+                <label><input type="radio" name="q20" value="b"> b) Booting</label>
+                <label><input type="radio" name="q20" value="c"> c) Rendering</label>
+                <label><input type="radio" name="q20" value="d"> d) Debugging</label>
+            </div>
+            <div class="answer-box" id="answer20" data-correct-answer="a">Correct Answer: a) Fine-Tuning</div>
+        </div>
+
+        <div class="question">
+            <h3>21. What is TRUE about LLMs?</h3>
+            <div class="options">
+                <label><input type="radio" name="q21" value="a"> a) They guess words randomly</label>
+                <label><input type="radio" name="q21" value="b"> b) They predict the next word using probability</label>
+                <label><input type="radio" name="q21" value="c"> c) They always know the correct answer</label>
+                <label><input type="radio" name="q21" value="d"> d) They store all text in memory</label>
+            </div>
+            <div class="answer-box" id="answer21" data-correct-answer="b">Correct Answer: b) They predict the next word using probability</div>
+        </div>
+
+        <div class="question">
+            <h3>22. Which model type is used mainly for <strong>text generation</strong>?</h3>
+            <div class="options">
+                <label><input type="radio" name="q22" value="a"> a) Encoder-only</label>
+                <label><input type="radio" name="q22" value="b"> b) Decoder-only</label>
+                <label><input type="radio" name="q22" value="c"> c) Encoder–Decoder</label>
+                <label><input type="radio" name="q22" value="d"> d) CNN model</label>
+            </div>
+            <div class="answer-box" id="answer22" data-correct-answer="b">Correct Answer: b) Decoder-only</div>
+        </div>
+
+        <!-- Questions 23-30 -->
+        <div class="question">
+            <h3>23. Which model type is good for <strong>understanding text</strong> (like classification)?</h3>
+            <div class="options">
+                <label><input type="radio" name="q23" value="a"> a) Encoder-only</label>
+                <label><input type="radio" name="q23" value="b"> b) Decoder-only</label>
+                <label><input type="radio" name="q23" value="c"> c) Encoder–Decoder</label>
+                <label><input type="radio" name="q23" value="d"> d) Vision model</label>
+            </div>
+            <div class="answer-box" id="answer23" data-correct-answer="a">Correct Answer: a) Encoder-only</div>
+        </div>
+
+        <div class="question">
+            <h3>24. Which model type is good for both <strong>understanding</strong> and <strong>generating text</strong>?</h3>
+            <div class="options">
+                <label><input type="radio" name="q24" value="a"> a) Encoder-only</label>
+                <label><input type="radio" name="q24" value="b"> b) Decoder-only</label>
+                <label><input type="radio" name="q24" value="c"> c) Encoder–Decoder</label>
+                <label><input type="radio" name="q24" value="d"> d) Audio model</label>
+            </div>
+            <div class="answer-box" id="answer24" data-correct-answer="c">Correct Answer: c) Encoder–Decoder</div>
+        </div>
+
+        <div class="question">
+            <h3>25. Why do LLMs need large datasets?</h3>
+            <div class="options">
+                <label><input type="radio" name="q25" value="a"> a) To learn language patterns</label>
+                <label><input type="radio" name="q25" value="b"> b) To control traffic</label>
+                <label><input type="radio" name="q25" value="c"> c) To increase screen brightness</label>
+                <label><input type="radio" name="q25" value="d"> d) To manage electricity</label>
+            </div>
+            <div class="answer-box" id="answer25" data-correct-answer="a">Correct Answer: a) To learn language patterns</div>
+        </div>
+
+        <div class="question">
+            <h3>26. LLMs are trained on:</h3>
+            <div class="options">
+                <label><input type="radio" name="q26" value="a"> a) Internet text and large datasets</label>
+                <label><input type="radio" name="q26" value="b"> b) Only one paragraph</label>
+                <label><input type="radio" name="q26" value="c"> c) Password files</label>
+                <label><input type="radio" name="q26" value="d"> d) Databases only</label>
+            </div>
+            <div class="answer-box" id="answer26" data-correct-answer="a">Correct Answer: a) Internet text and large datasets</div>
+        </div>
+
+        <div class="question">
+            <h3>27. Which of the following is a limitation of LLMs?</h3>
+            <div class="options">
+                <label><input type="radio" name="q27" value="a"> a) They read minds</label>
+                <label><input type="radio" name="q27" value="b"> b) They never make mistakes</label>
+                <label><input type="radio" name="q27" value="c"> c) They can give wrong answers</label>
+                <label><input type="radio" name="q27" value="d"> d) They don't need training</label>
+            </div>
+            <div class="answer-box" id="answer27" data-correct-answer="c">Correct Answer: c) They can give wrong answers</div>
+        </div>
+
+        <div class="question">
+            <h3>28. What does "fine-tuning" do for LLMs?</h3>
+            <div class="options">
+                <label><input type="radio" name="q28" value="a"> a) Makes the model smaller only</label>
+                <label><input type="radio" name="q28" value="b"> b) Teaches the model a new task</label>
+                <label><input type="radio" name="q28" value="c"> c) Deletes old knowledge</label>
+                <label><input type="radio" name="q28" value="d"> d) Stops training</label>
+            </div>
+            <div class="answer-box" id="answer28" data-correct-answer="b">Correct Answer: b) Teaches the model a new task</div>
+        </div>
+
+        <div class="question">
+            <h3>29. LLMs generate output:</h3>
+            <div class="options">
+                <label><input type="radio" name="q29" value="a"> a) Randomly with no logic</label>
+                <label><input type="radio" name="q29" value="b"> b) Based on learned patterns from data</label>
+                <label><input type="radio" name="q29" value="c"> c) Using Wi-Fi signals</label>
+                <label><input type="radio" name="q29" value="d"> d) By guessing only</label>
+            </div>
+            <div class="answer-box" id="answer29" data-correct-answer="b">Correct Answer: b) Based on learned patterns from data</div>
+        </div>
+
+        <div class="question">
+            <h3>30. Prompt tuning is used to:</h3>
+            <div class="options">
+                <label><input type="radio" name="q30" value="a"> a) Change all model weights</label>
+                <label><input type="radio" name="q30" value="b"> b) Improve model output using better prompts</label>
+                <label><input type="radio" name="q30" value="c"> c) Delete training data</label>
+                <label><input type="radio" name="q30" value="d"> d) Reduce token size</label>
+            </div>
+            <div class="answer-box" id="answer30" data-correct-answer="b">Correct Answer: b) Improve model output using better prompts</div>
+        </div>
+
+        <!-- Questions 31-40 -->
+        <div class="question">
+            <h3>31. LLMs are often used in chatbots to:</h3>
+            <div class="options">
+                <label><input type="radio" name="q31" value="a"> a) Make 3D animations</label>
+                <label><input type="radio" name="q31" value="b"> b) Play music instruments</label>
+                <label><input type="radio" name="q31" value="c"> c) Change phone settings</label>
+                <label><input type="radio" name="q31" value="d"> d) Talk with users and answer questions</label>
+            </div>
+            <div class="answer-box" id="answer31" data-correct-answer="d">Correct Answer: d) Talk with users and answer questions</div>
+        </div>
+
+        <div class="question">
+            <h3>32. Which task can LLMs perform in customer service?</h3>
+            <div class="options">
+                <label><input type="radio" name="q32" value="a"> a) Auto-reply and support</label>
+                <label><input type="radio" name="q32" value="b"> b) Repair devices</label>
+                <label><input type="radio" name="q32" value="c"> c) Ship products</label>
+                <label><input type="radio" name="q32" value="d"> d) Drive cars</label>
+            </div>
+            <div class="answer-box" id="answer32" data-correct-answer="a">Correct Answer: a) Auto-reply and support</div>
+        </div>
+
+        <div class="question">
+            <h3>33. LLMs can help in education by:</h3>
+            <div class="options">
+                <label><input type="radio" name="q33" value="a"> a) Generating study notes and explanations</label>
+                <label><input type="radio" name="q33" value="b"> b) Cooking meals for students</label>
+                <label><input type="radio" name="q33" value="c"> c) Taking attendance physically</label>
+                <label><input type="radio" name="q33" value="d"> d) Cleaning classrooms</label>
+            </div>
+            <div class="answer-box" id="answer33" data-correct-answer="a">Correct Answer: a) Generating study notes and explanations</div>
+        </div>
+
+        <div class="question">
+            <h3>34. LLMs can assist doctors by:</h3>
+            <div class="options">
+                <label><input type="radio" name="q34" value="a"> a) Mixing medicines physically</label>
+                <label><input type="radio" name="q34" value="b"> b) Performing surgery</label>
+                <label><input type="radio" name="q34" value="c"> c) Summarizing medical reports</label>
+                <label><input type="radio" name="q34" value="d"> d) Driving hospital vehicles</label>
+            </div>
+            <div class="answer-box" id="answer34" data-correct-answer="c">Correct Answer: c) Summarizing medical reports</div>
+        </div>
+
+        <div class="question">
+            <h3>35. Which LLM application helps in searching and retrieving relevant text?</h3>
+            <div class="options">
+                <label><input type="radio" name="q35" value="a"> a) Smartphone unlocking</label>
+                <label><input type="radio" name="q35" value="b"> b) Weather control</label>
+                <label><input type="radio" name="q35" value="c"> c) Antivirus scanning</label>
+                <label><input type="radio" name="q35" value="d"> d) Information retrieval</label>
+            </div>
+            <div class="answer-box" id="answer35" data-correct-answer="d">Correct Answer: d) Information retrieval</div>
+        </div>
+
+        <div class="question">
+            <h3>36. Which of the following is a risk of LLMs?</h3>
+            <div class="options">
+                <label><input type="radio" name="q36" value="a"> a) Generating harmful or false content</label>
+                <label><input type="radio" name="q36" value="b"> b) Reading the user's mind</label>
+                <label><input type="radio" name="q36" value="c"> c) Never making mistakes</label>
+                <label><input type="radio" name="q36" value="d"> d) Physical damage</label>
+            </div>
+            <div class="answer-box" id="answer36" data-correct-answer="a">Correct Answer: a) Generating harmful or false content</div>
+        </div>
+
+        <div class="question">
+            <h3>37. LLMs are trained using:</h3>
+            <div class="options">
+                <label><input type="radio" name="q37" value="a"> a) GPUs</label>
+                <label><input type="radio" name="q37" value="b"> b) Shoes</label>
+                <label><input type="radio" name="q37" value="c"> c) Keyboards only</label>
+                <label><input type="radio" name="q37" value="d"> d) Printers</label>
+            </div>
+            <div class="answer-box" id="answer37" data-correct-answer="a">Correct Answer: a) GPUs</div>
+        </div>
+
+        <div class="question">
+            <h3>38. Why can LLMs produce wrong answers sometimes?</h3>
+            <div class="options">
+                <label><input type="radio" name="q38" value="a"> a) They predict patterns, not facts</label>
+                <label><input type="radio" name="q38" value="b"> b) They have built-in truth database</label>
+                <label><input type="radio" name="q38" value="c"> c) They check everything on the internet live</label>
+                <label><input type="radio" name="q38" value="d"> d) They verify answers with humans</label>
+            </div>
+            <div class="answer-box" id="answer38" data-correct-answer="a">Correct Answer: a) They predict patterns, not facts</div>
+        </div>
+
+        <div class="question">
+            <h3>39. LLMs learn using:</h3>
+            <div class="options">
+                <label><input type="radio" name="q39" value="a"> a) Screens</label>
+                <label><input type="radio" name="q39" value="b"> b) USB drives</label>
+                <label><input type="radio" name="q39" value="c"> c) Parameters</label>
+                <label><input type="radio" name="q39" value="d"> d) Keyboards</label>
+            </div>
+            <div class="answer-box" id="answer39" data-correct-answer="c">Correct Answer: c) Parameters</div>
+        </div>
+
+        <div class="question">
+            <h3>40. Which is an example of a good prompt?</h3>
+            <div class="options">
+                <label><input type="radio" name="q40" value="a"> a) "Write a clear 3-line summary."</label>
+                <label><input type="radio" name="q40" value="b"> b) "Talk something."</label>
+                <label><input type="radio" name="q40" value="c"> c) "Whatever."</label>
+                <label><input type="radio" name="q40" value="d"> d) "Guess anything."</label>
+            </div>
+            <div class="answer-box" id="answer40" data-correct-answer="a">Correct Answer: a) "Write a clear 3-line summary."</div>
+        </div>
+
+        <div class="footer-note">
+            دعواتكم للمساعد الخفي والعاملين على الموقع بالتوفيق والسداد والزوجة الصالحة
+        </div>
+    </div>
+
+    <script>
+        function resetQuiz() {
+            const radioButtons = document.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => radio.checked = false);
+
+            const answerBoxes = document.querySelectorAll('.answer-box');
+            answerBoxes.forEach(box => {
+                box.style.display = 'none';
+                box.classList.remove('correct', 'incorrect');
+            });
+        }
+
+        function showAllAnswers() {
+            const answerBoxes = document.querySelectorAll('.answer-box');
+            answerBoxes.forEach(box => {
+                box.style.display = 'block';
+                box.classList.add('correct');
+            });
+        }
+
+        function hideAllAnswers() {
+            const answerBoxes = document.querySelectorAll('.answer-box');
+            answerBoxes.forEach(box => {
+                box.style.display = 'none';
+                box.classList.remove('correct', 'incorrect');
+            });
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if(body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '🌙 Dark Mode';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '☀️ Light Mode';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Check for saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if(savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '☀️ Light Mode';
+            }
+        });
+
+        // Add event listeners to radio buttons
+        const radioButtons = document.querySelectorAll('input[type="radio"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const questionNumber = e.target.name.substring(1);
+                const answerBox = document.getElementById(`answer${questionNumber}`);
+                const correctAnswerValue = answerBox.getAttribute('data-correct-answer');
+                const userAnswer = e.target.value;
+
+                if (userAnswer === correctAnswerValue) {
+                    answerBox.innerHTML = `Correct!`;
+                    answerBox.classList.add('correct');
+                    answerBox.classList.remove('incorrect');
+                } else {
+                    answerBox.innerHTML = `Incorrect. Correct Answer: ${correctAnswerValue}`;
+                    answerBox.classList.add('incorrect');
+                    answerBox.classList.remove('correct');
+                }
+                answerBox.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
